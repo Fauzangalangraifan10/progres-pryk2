@@ -1,17 +1,18 @@
+// src/scripts/sw.js
 import { precacheAndRoute } from 'workbox-precaching';
-import { registerRoute, NavigationRoute } from 'workbox-routing';
+import { registerRoute } from 'workbox-routing';
 import { NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 
-// Aktifkan SW langsung
+// Aktifkan SW langsung setelah install
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
 
 // 1. Precaching file hasil build
-precacheAndRoute(self.__WB_MANIFEST);
+precacheAndRoute(self.__WB_MANIFEST || []);
 
-// 2. Navigasi offline fallback
+// 2. Navigasi offline fallback (Application Shell)
 registerRoute(
   ({ request }) => request.mode === 'navigate',
   new NetworkFirst({
@@ -58,11 +59,10 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
-// 6. Interaktif klik notifikasi
+// 6. Klik notifikasi
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const urlToOpen = event.notification.data.url;
-
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then((windowClients) => {
       for (const client of windowClients) {

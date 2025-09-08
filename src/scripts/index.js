@@ -1,10 +1,20 @@
 // src/scripts/index.js
-
 import 'regenerator-runtime';
 import 'leaflet/dist/leaflet.css';
 import '../styles/styles.css';
 import App from './pages/app.js';
-import swRegister from './utils/sw-register';
+
+// Fungsi registrasi SW
+async function swRegister() {
+  if ('serviceWorker' in navigator) {
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.bundle.js');
+      console.log('Service Worker registered!', reg);
+    } catch (err) {
+      console.error('Service Worker registration failed:', err);
+    }
+  }
+}
 
 window.addEventListener('DOMContentLoaded', async () => {
   const app = new App({
@@ -13,12 +23,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     drawerNavigation: document.querySelector('#navigationDrawer'),
   });
 
-  // Render halaman setiap kali URL hash berubah
-  window.addEventListener('hashchange', () => {
-    app.renderPage();
-  });
+  // Render halaman saat URL hash berubah
+  window.addEventListener('hashchange', () => app.renderPage());
 
-  // Muat halaman awal dan daftarkan service worker
+  // Render halaman awal
   await app.renderPage();
+
+  // Register SW
   await swRegister();
 });

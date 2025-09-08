@@ -5,7 +5,6 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { InjectManifest } = require('workbox-webpack-plugin');
 
-
 module.exports = merge(common, {
   mode: 'production',
   module: {
@@ -20,9 +19,7 @@ module.exports = merge(common, {
         use: [
           {
             loader: 'babel-loader',
-            options: {
-              presets: ['@babel/preset-env'],
-            },
+            options: { presets: ['@babel/preset-env'] },
           },
         ],
       },
