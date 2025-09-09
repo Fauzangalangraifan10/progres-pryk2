@@ -70,43 +70,58 @@ class App {
     resizeHandler();
   }
 
-  // Logic Subscribe/Unsubscribe
+  // Logic Subscribe/Unsubscribe [VERSI PERBAIKAN]
   async _initSubscribeButton() {
-    const btn = this._header.querySelector('#subscribe-btn');
-    const icon = this._header.querySelector('#subscribe-icon');
-    const text = this._header.querySelector('#subscribe-text');
-    if (!btn) return;
+    // ✅ Cari SEMUA tombol subscribe menggunakan class
+    const subscribeButtons = this._header.querySelectorAll('.js-subscribe-btn');
+    if (subscribeButtons.length === 0) return;
 
     const registration = await navigator.serviceWorker.ready;
     const existingSubscription = await registration.pushManager.getSubscription();
 
-    if (existingSubscription) {
-      icon.textContent = '🔔';
-      text.textContent = 'Unsubscribe';
-    }
+    // Fungsi untuk update tampilan tombol
+    const updateButtonState = (isSubscribed) => {
+      subscribeButtons.forEach(button => {
+        const icon = button.querySelector('.subscribe-icon-js');
+        const text = button.querySelector('.subscribe-text-js');
+        if (isSubscribed) {
+          icon.textContent = '🔕'; // Ganti ikon agar lebih jelas
+          text.textContent = 'Unsubscribe';
+        } else {
+          icon.textContent = '🔔';
+          text.textContent = 'Subscribe';
+        }
+      });
+    };
 
-    btn.addEventListener('click', async () => {
-      const subscription = await registration.pushManager.getSubscription();
-      if (subscription) {
-        await NotificationHelper.unsubscribe();
-        icon.textContent = '🔔';
-        text.textContent = 'Subscribe';
-        alert('Berhasil unsubscribe notifikasi!');
-      } else {
-        const granted = await NotificationHelper.requestPermission();
-        if (!granted) return alert('Permission not granted!');
-        await NotificationHelper.subscribe();
-        icon.textContent = '🔔';
-        text.textContent = 'Unsubscribe';
-        alert('Berhasil subscribe notifikasi!');
-      }
+    // Set state awal saat halaman dimuat
+    updateButtonState(!!existingSubscription);
+
+    // Tambahkan event listener ke setiap tombol (desktop dan mobile)
+    subscribeButtons.forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) {
+          await NotificationHelper.unsubscribe();
+          updateButtonState(false); // Update semua tombol ke state 'Subscribe'
+          alert('Berhasil unsubscribe notifikasi!');
+        } else {
+          const granted = await NotificationHelper.requestPermission();
+          if (!granted) {
+            alert('Izin notifikasi tidak diberikan!');
+            return;
+          }
+          await NotificationHelper.subscribe();
+          updateButtonState(true); // Update semua tombol ke state 'Unsubscribe'
+          alert('Berhasil subscribe notifikasi!');
+        }
+      });
     });
   }
 
   // Render page sesuai route
   async renderPage() {
-    // PENTING: Pindahkan renderHeader() ke awal
-    await this.renderHeader(); 
+    await this.renderHeader();
 
     if (this._currentPage && typeof this._currentPage.unmount === 'function') {
       this._currentPage.unmount();
@@ -114,21 +129,17 @@ class App {
 
     const token = getAccessToken();
     const url = UrlParser.parseActiveUrlWithCombiner();
-    
+
     let page;
 
     if (url === '/login' || url === '/register') {
-      // halaman khusus login & register
       page = routes[url];
     } else if (token) {
-      // kalau sudah login, cek route lain
       page = routes[url] || routes['/404'];
     } else {
-      // kalau belum login, selalu arahkan ke login
       page = routes['/login'];
     }
     
-    // fallback terakhir (jaga-jaga)
     if (!page) {
       page = routes['/404'];
     }

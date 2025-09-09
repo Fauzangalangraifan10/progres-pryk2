@@ -1,5 +1,5 @@
 // ==========================
-// Header untuk user yang sudah login
+// Header untuk user yang sudah login [VERSI PERBAIKAN]
 // ==========================
 export const LoggedInHeader = `
   <div class="main-header">
@@ -9,16 +9,14 @@ export const LoggedInHeader = `
       </a>
     </h1>
 
-    <!-- Hamburger button -->
     <button class="drawer-button" aria-label="Toggle Navigation">☰</button>
 
-    <!-- Desktop Nav -->
     <nav class="desktop-nav" aria-label="Main Navigation">
       <ul>
         <li>
-          <button id="subscribe-btn" class="nav-btn">
-            <span id="subscribe-icon">🔔</span> 
-            <span id="subscribe-text">Subscribe</span>
+          <button id="subscribe-btn-desktop" class="nav-btn js-subscribe-btn">
+            <span id="subscribe-icon-desktop" class="subscribe-icon-js">🔔</span>
+            <span id="subscribe-text-desktop" class="subscribe-text-js">Subscribe</span>
           </button>
         </li>
         <li>
@@ -39,13 +37,12 @@ export const LoggedInHeader = `
       </ul>
     </nav>
 
-    <!-- Navigation Drawer for Mobile -->
     <nav class="navigation-drawer">
       <ul class="nav-list">
         <li>
-          <button id="subscribe-btn-mobile" class="nav-btn">
-            <span id="subscribe-icon">🔔</span> 
-            <span id="subscribe-text">Subscribe</span>
+          <button id="subscribe-btn-mobile" class="nav-btn js-subscribe-btn">
+            <span id="subscribe-icon-mobile" class="subscribe-icon-js">🔔</span>
+            <span id="subscribe-text-mobile" class="subscribe-text-js">Subscribe</span>
           </button>
         </li>
         <li>
@@ -78,19 +75,13 @@ export const LoggedOutHeader = `
         <span class="logo-icon">📖</span> Story App
       </a>
     </h1>
-
-    <!-- Hamburger button -->
     <button class="drawer-button" aria-label="Toggle Navigation">☰</button>
-
-    <!-- Desktop Nav -->
     <nav class="desktop-nav" aria-label="Main Navigation">
       <ul>
         <li><a href="#/login" class="nav-btn">Login</a></li>
         <li><a href="#/register" class="nav-btn">Register</a></li>
       </ul>
     </nav>
-
-    <!-- Navigation Drawer for Mobile -->
     <nav class="navigation-drawer">
       <ul class="nav-list">
         <li><a href="#/login" class="nav-btn">Login</a></li>
@@ -101,7 +92,7 @@ export const LoggedOutHeader = `
 `;
 
 // ==========================
-// Template untuk 1 item story (Home & Bookmark)
+// Template untuk 1 item story
 // ==========================
 export const StoryItemTemplate = (story) => `
   <div class="story-item">
