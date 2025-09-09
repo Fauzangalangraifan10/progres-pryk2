@@ -27,10 +27,10 @@ module.exports = merge(common, {
     },
     historyApiFallback: true, // penting untuk SPA
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, '../src/index.html'),
-    }),
-  ],
+  // plugins: [
+  //   new HtmlWebpackPlugin({
+  //     template: path.resolve(__dirname, '../src/index.html'),
+  //   }),
+  // ],
   devtool: 'eval-source-map',
 });

@@ -1,7 +1,7 @@
 // src/scripts/utils/notification-helper.js
 
 import CONFIG from '../config';
-import { subscribePushNotification, unsubscribePushNotification } from '../data/api';
+import { subscribePushNotification, unsubscribePushNotification } from "../data/api";
 
 const NotificationHelper = {
   // Cek apakah browser mendukung push notification
@@ -34,13 +34,19 @@ const NotificationHelper = {
       const existingSubscription = await registration.pushManager.getSubscription();
       if (existingSubscription) return existingSubscription;
 
+      // Buat subscription baru tanpa expirationTime
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: convertBase64ToUint8Array(CONFIG.VAPID_PUBLIC_KEY),
       });
 
-      await subscribePushNotification(subscription);
-      console.log('✅ Push notification berhasil disubscribe');
+      try {
+        await subscribePushNotification(subscription);
+        console.log('✅ Push notification berhasil disubscribe');
+      } catch (apiError) {
+        console.warn('⚠️ Subscribe berhasil tapi gagal kirim ke server:', apiError.message);
+      }
+
       return subscription;
     } catch (error) {
       console.error('❌ Gagal subscribe push notification:', error);
@@ -56,9 +62,16 @@ const NotificationHelper = {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
       if (subscription) {
+        // Hapus di browser dulu
         await subscription.unsubscribe();
-        await unsubscribePushNotification(subscription);
-        console.log('✅ Push notification berhasil di-unsubscribe');
+
+        try {
+          await unsubscribePushNotification(subscription);
+          console.log('✅ Push notification berhasil di-unsubscribe di server');
+        } catch (apiError) {
+          console.warn('⚠️ Berhasil unsubscribe di browser, tapi gagal di server (CORS/blocked)');
+        }
+
         return true;
       }
       return false;

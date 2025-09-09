@@ -1,9 +1,6 @@
 // ==========================
 // Header untuk user yang sudah login
 // ==========================
-// ==========================
-// Header untuk user yang sudah login
-// ==========================
 export const LoggedInHeader = `
   <div class="main-header">
     <h1 class="brand-name">
@@ -11,6 +8,11 @@ export const LoggedInHeader = `
         <span class="logo-icon">📖</span> Story App
       </a>
     </h1>
+
+    <!-- Hamburger button -->
+    <button class="drawer-button" aria-label="Toggle Navigation">☰</button>
+
+    <!-- Desktop Nav -->
     <nav class="desktop-nav" aria-label="Main Navigation">
       <ul>
         <li>
@@ -36,9 +38,35 @@ export const LoggedInHeader = `
         </li>
       </ul>
     </nav>
+
+    <!-- Navigation Drawer for Mobile -->
+    <nav class="navigation-drawer">
+      <ul class="nav-list">
+        <li>
+          <button id="subscribe-btn-mobile" class="nav-btn">
+            <span id="subscribe-icon">🔔</span> 
+            <span id="subscribe-text">Subscribe</span>
+          </button>
+        </li>
+        <li>
+          <a href="#/saved" class="nav-btn">
+            Saved Stories <i class="fas fa-bookmark"></i>
+          </a>
+        </li>
+        <li>
+          <a href="#/add" class="nav-btn">
+            Add Story <i class="fas fa-plus"></i>
+          </a>
+        </li>
+        <li>
+          <a href="#/logout" class="nav-btn logout-btn">
+            Logout <i class="fas fa-sign-out-alt"></i>
+          </a>
+        </li>
+      </ul>
+    </nav>
   </div>
 `;
-
 
 // ==========================
 // Header untuk user yang belum login
@@ -50,8 +78,21 @@ export const LoggedOutHeader = `
         <span class="logo-icon">📖</span> Story App
       </a>
     </h1>
+
+    <!-- Hamburger button -->
+    <button class="drawer-button" aria-label="Toggle Navigation">☰</button>
+
+    <!-- Desktop Nav -->
     <nav class="desktop-nav" aria-label="Main Navigation">
       <ul>
+        <li><a href="#/login" class="nav-btn">Login</a></li>
+        <li><a href="#/register" class="nav-btn">Register</a></li>
+      </ul>
+    </nav>
+
+    <!-- Navigation Drawer for Mobile -->
+    <nav class="navigation-drawer">
+      <ul class="nav-list">
         <li><a href="#/login" class="nav-btn">Login</a></li>
         <li><a href="#/register" class="nav-btn">Register</a></li>
       </ul>
@@ -82,6 +123,7 @@ export const StoryItemTemplate = (story) => `
     </div>
   </div>
 `;
+
 // ==========================
 // Template untuk detail story
 // ==========================

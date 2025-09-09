@@ -14,18 +14,14 @@ class App {
 
     // Skip link
     this._skipLink = document.createElement('a');
-    this._skipLink.href = '#main-content'; 
+    this._skipLink.href = '#main-content';
     this._skipLink.className = 'skip-link';
     this._skipLink.textContent = 'Skip to Content';
-    
     this._skipLink.addEventListener('click', (event) => {
-      event.preventDefault(); 
-      const mainContent = document.getElementById('main-content'); 
-      if (mainContent) {
-        mainContent.focus();
-      }
+      event.preventDefault();
+      const mainContent = document.getElementById('main-content');
+      if (mainContent) mainContent.focus();
     });
-
     document.body.insertBefore(this._skipLink, this._header);
   }
 
@@ -34,17 +30,51 @@ class App {
     const token = getAccessToken();
     this._header.innerHTML = token ? LoggedInHeader : LoggedOutHeader;
 
-    // Inisialisasi tombol Subscribe/Unsubscribe jika user login
-    if (token) {
-      this._initSubscribeButton();
-    }
+    // Setelah header di-render, inisialisasi hamburger dan subscribe button
+    this._initHamburger();
+    if (token) this._initSubscribeButton();
+  }
+
+  // Hamburger drawer
+  _initHamburger() {
+    const drawerButton = this._header.querySelector('.drawer-button');
+    const drawer = this._header.querySelector('.navigation-drawer');
+    if (!drawerButton || !drawer) return;
+
+    // Toggle drawer saat klik tombol
+    drawerButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      drawer.classList.toggle('open');
+    });
+
+    // Tutup drawer saat klik link/button di dalam drawer
+    const drawerLinks = drawer.querySelectorAll('a, button');
+    drawerLinks.forEach(link => {
+      link.addEventListener('click', () => drawer.classList.remove('open'));
+    });
+
+    // Tutup drawer saat klik di luar drawer
+    document.addEventListener('click', (e) => {
+      if (!drawer.contains(e.target) && e.target !== drawerButton) {
+        drawer.classList.remove('open');
+      }
+    });
+
+    // Tutup drawer saat resize ke desktop (>992px)
+    const resizeHandler = () => {
+      if (window.innerWidth > 992) {
+        drawer.classList.remove('open');
+      }
+    };
+    window.addEventListener('resize', resizeHandler);
+    resizeHandler();
   }
 
   // Logic Subscribe/Unsubscribe
   async _initSubscribeButton() {
-    const btn = document.getElementById('subscribe-btn');
-    const icon = document.getElementById('subscribe-icon');
-    const text = document.getElementById('subscribe-text');
+    const btn = this._header.querySelector('#subscribe-btn');
+    const icon = this._header.querySelector('#subscribe-icon');
+    const text = this._header.querySelector('#subscribe-text');
     if (!btn) return;
 
     if ('serviceWorker' in navigator) {
@@ -53,7 +83,6 @@ class App {
         .catch((err) => console.error('Service Worker registration failed:', err));
     }
 
-    // Cek status subscription awal
     const registration = await navigator.serviceWorker.ready;
     const existingSubscription = await registration.pushManager.getSubscription();
 
@@ -64,18 +93,14 @@ class App {
 
     btn.addEventListener('click', async () => {
       const subscription = await registration.pushManager.getSubscription();
-
       if (subscription) {
-        // Unsubscribe
         await NotificationHelper.unsubscribe();
         icon.textContent = '🔔';
         text.textContent = 'Subscribe';
         alert('Berhasil unsubscribe notifikasi!');
       } else {
-        // Subscribe
         const granted = await NotificationHelper.requestPermission();
         if (!granted) return alert('Permission not granted!');
-
         await NotificationHelper.subscribe();
         icon.textContent = '🔔';
         text.textContent = 'Unsubscribe';
@@ -83,41 +108,32 @@ class App {
       }
     });
   }
-  
+
   // Render page sesuai route
   async renderPage() {
+    // PENTING: Pindahkan renderHeader() ke awal
+    await this.renderHeader(); 
+
     if (this._currentPage && typeof this._currentPage.unmount === 'function') {
       this._currentPage.unmount();
     }
 
     const token = getAccessToken();
     const url = UrlParser.parseActiveUrlWithCombiner();
-
     let page;
 
-    if (url === '/login' || url === '/register') {
-      page = routes[url];
-    } else if (token) {
-      page = routes[url] || routes['/'];
-    } else {
-      page = routes['/login'];
-    }
+    if (url === '/login' || url === '/register') page = routes[url];
+    else if (token) page = routes[url] || routes['/'];
+    else page = routes['/login'];
 
-    if (page) {
-      document.startViewTransition(async () => {
-        this._content.innerHTML = await page.render();
-        await page.afterRender();
-      });
-    } else {
-      page = routes['/404'];
-      document.startViewTransition(async () => {
-        this._content.innerHTML = await page.render();
-        await page.afterRender();
-      });
-    }
-    
+    if (!page) page = routes['/404'];
+
+    document.startViewTransition(async () => {
+      this._content.innerHTML = await page.render();
+      if (page.afterRender) await page.afterRender();
+    });
+
     this._currentPage = page;
-    await this.renderHeader();
   }
 }
 
