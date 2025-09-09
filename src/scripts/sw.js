@@ -18,7 +18,7 @@ registerRoute(
   ({ url }) => url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com',
   new CacheFirst({
     cacheName: 'google-fonts',
-  })
+  }),
 );
 
 // 3️⃣ Cache FontAwesome
@@ -26,7 +26,7 @@ registerRoute(
   ({ url }) => url.origin === 'https://cdnjs.cloudflare.com' || url.origin.includes('fontawesome'),
   new CacheFirst({
     cacheName: 'fontawesome',
-  })
+  }),
 );
 
 // 4️⃣ Cache avatars
@@ -36,12 +36,12 @@ registerRoute(
     cacheName: 'avatars-api',
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
-      new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 }),
+      new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 }), // Cache selama 30 hari
     ],
-  })
+  }),
 );
 
-// 5️⃣ Cache API (JSON / data)
+// 5️⃣ Cache API (JSON / data) - Strategi NetworkFirst
 registerRoute(
   ({ request, url }) => {
     const baseUrl = new URL(CONFIG.BASE_URL);
@@ -51,12 +51,12 @@ registerRoute(
     cacheName: 'story-api',
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
-      new ExpirationPlugin({ maxEntries: 100, maxAgeSeconds: 24 * 60 * 60 }),
+      new ExpirationPlugin({ maxEntries: 100, maxAgeSeconds: 24 * 60 * 60 }), // Cache selama 1 hari
     ],
-  })
+  }),
 );
 
-// 6️⃣ Cache API images
+// 6️⃣ Cache API images - Strategi StaleWhileRevalidate
 registerRoute(
   ({ request, url }) => {
     const baseUrl = new URL(CONFIG.BASE_URL);
@@ -66,36 +66,66 @@ registerRoute(
     cacheName: 'story-api-images',
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
-      new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 }),
+      new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 }), // Cache selama 30 hari
     ],
-  })
+  }),
 );
 
 // 7️⃣ Cache Map / Tiles
 registerRoute(
   ({ url }) => url.origin.includes('maptiler'),
-  new CacheFirst({ cacheName: 'map-tiles' })
+  new CacheFirst({ cacheName: 'map-tiles' }),
 );
 
-// 8️⃣ Push notification
+// 8️⃣ Push notification handler [PERBAIKAN]
 self.addEventListener('push', (event) => {
-  const data = event.data?.json() || { title: 'Story App', options: { body: 'Ada cerita baru!' } };
-  const options = data.options || { body: 'Ada cerita baru!' };
+  // ✅ SOLUSI: Tambahkan blok try...catch untuk parsing data agar tidak error
+  let data;
+  try {
+    // Coba parse data push sebagai JSON
+    data = event.data.json();
+  } catch (error) {
+    // Jika gagal (misal data kosong), gunakan data default
+    console.error('Push event data is not valid JSON:', error);
+    data = {
+      title: 'Story App',
+      options: {
+        body: 'Ada cerita baru untukmu!',
+        icon: '/icons/icon-192x192.png', // Tambahkan ikon agar lebih menarik
+        badge: '/icons/icon-72x72.png',
+      },
+    };
+  }
 
-  event.waitUntil(self.registration.showNotification(data.title, options));
+  const title = data.title || 'Story App';
+  const options = data.options || {
+    body: 'Ada cerita baru untukmu!',
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/icon-72x72.png',
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// 9️⃣ Klik notifikasi
+
+// 9️⃣ Klik notifikasi handler
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  // Ambil URL dari data notifikasi, jika tidak ada, buka halaman utama
   const urlToOpen = event.notification.data?.url || '/';
 
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then((windowClients) => {
+      // Cek jika tab dengan URL yang sama sudah terbuka
       for (const client of windowClients) {
-        if (client.url === urlToOpen && 'focus' in client) return client.focus();
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
+        }
       }
-      if (clients.openWindow) return clients.openWindow(urlToOpen);
-    })
+      // Jika tidak ada tab yang terbuka, buka window baru
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    }),
   );
 });

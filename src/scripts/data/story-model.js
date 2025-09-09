@@ -24,21 +24,21 @@ class StoryModel {
   }
 
   static async addStory(storyData) {
+    // `storyData` di sini adalah objek FormData yang sudah jadi dari presenter
     const token = getAccessToken();
     if (!token) {
       throw new Error('Anda harus login terlebih dahulu');
     }
+    return apiAddNewStory(storyData); 
+  }
 
-    const formData = new FormData();
-    formData.append('description', storyData.description);
-    formData.append('photo', storyData.photoBlob, 'story.jpg');
-
-    if (storyData.lat && storyData.lon) {
-      formData.append('lat', storyData.lat);
-      formData.append('lon', storyData.lon);
-    }
-    
-    return apiAddNewStory({ formData, token });
+  // Tambahan untuk halaman Not Found
+  static getNotFountMessage() {
+    return {
+      title: '404 - Halaman Tidak Ditemukan',
+      description: 'Alamat yang Anda tuju tidak tersedia.',
+      homeLink: '#/',
+    };
   }
 }
 

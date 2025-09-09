@@ -17,16 +17,24 @@ class AddPagePresenter {
       return;
     }
 
+    // ✅ SOLUSI: Gunakan FormData sesuai saran reviewer
     try {
       this._view.showLoading();
-      await StoryModel.addStory({
-        description: data.description,
-        photoBlob: data.photoBlob,
-        lat: data.lat,
-        lon: data.lon,
-      });
 
-      // PERBAIKAN: Setelah berhasil, langsung panggil metode redirect tanpa argumen
+      // Buat objek FormData
+      const formData = new FormData();
+      formData.append('description', data.description);
+      formData.append('photo', data.photoBlob, 'photo.jpg'); // photoBlob adalah file gambar
+      
+      // Tambahkan lat dan lon jika ada
+      if (data.lat && data.lon) {
+        formData.append('lat', data.lat);
+        formData.append('lon', data.lon);
+      }
+
+      // Kirim formData ke model
+      await StoryModel.addStory(formData);
+
       this._view.showSuccessAndRedirect();
     } catch (error) {
       this._view.showError(error.message);

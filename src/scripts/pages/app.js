@@ -114,13 +114,24 @@ class App {
 
     const token = getAccessToken();
     const url = UrlParser.parseActiveUrlWithCombiner();
+    
     let page;
 
-    if (url === '/login' || url === '/register') page = routes[url];
-    else if (token) page = routes[url] || routes['/'];
-    else page = routes['/login'];
-
-    if (!page) page = routes['/404'];
+    if (url === '/login' || url === '/register') {
+      // halaman khusus login & register
+      page = routes[url];
+    } else if (token) {
+      // kalau sudah login, cek route lain
+      page = routes[url] || routes['/404'];
+    } else {
+      // kalau belum login, selalu arahkan ke login
+      page = routes['/login'];
+    }
+    
+    // fallback terakhir (jaga-jaga)
+    if (!page) {
+      page = routes['/404'];
+    }
 
     document.startViewTransition(async () => {
       this._content.innerHTML = await page.render();

@@ -69,7 +69,7 @@ header {
   font-weight: 700;
   color: var(--highlight-color);
   text-shadow: 0 0 8px var(--highlight-color),
-                0 0 15px rgba(241, 196, 15, 0.5);
+               0 0 15px rgba(241, 196, 15, 0.5);
 }
 
 .brand-name a {
@@ -119,7 +119,6 @@ header {
   color: var(--accent-color);
   text-shadow: 0 0 12px var(--highlight-color), 0 0 20px var(--accent-color);
 }
-
 
 .nav-list {
   list-style: none;
@@ -595,6 +594,10 @@ footer {
   width: auto;
   margin-inline: auto;
 }
+#subscribe-text {
+  color: white; 
+}
+
 
 #saved-stories {
   display: grid;
@@ -637,7 +640,6 @@ footer {
   border: none; /* Hapus border di sini karena sudah ada di .image-container */
 }
 
-
 .saved-story h3 {
   font-size: 1.5rem;
   color: var(--highlight-color);
@@ -675,6 +677,104 @@ footer {
 }
 
 /* =========================
+   Halaman Not Found (404) - [BARU]
+========================= */
+.not-fount {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - var(--header-height) - var(--footer-spacing));
+  text-align: center;
+  background-color: var(--main-color);
+  overflow: hidden;
+  position: relative;
+  padding: 2rem;
+}
+
+.not-fount h2 {
+  font-size: 8rem;
+  font-weight: 900;
+  margin: 0;
+  color: var(--highlight-color);
+  position: relative;
+  animation: glitch 1s linear infinite;
+}
+
+.not-fount h2::before,
+.not-fount h2::after {
+  content: '404';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--main-color);
+  overflow: hidden;
+}
+
+.not-fount h2::before {
+  left: 2px;
+  text-shadow: -2px 0 var(--error-color);
+  animation: glitch-before 1.5s linear infinite reverse;
+}
+
+.not-fount h2::after {
+  left: -2px;
+  text-shadow: -2px 0 var(--accent-color), 2px 2px var(--error-color);
+  animation: glitch-after 0.5s linear infinite reverse;
+}
+
+.not-fount p {
+  font-size: 1.25rem;
+  color: var(--secondary-color);
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+.not-fount a {
+  display: inline-block;
+  padding: 0.8rem 2rem;
+  border-radius: 8px;
+  background-color: var(--highlight-color);
+  color: var(--header-color);
+  font-weight: bold;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(241, 196, 15, 0.5);
+}
+
+.not-fount a:hover {
+  background-color: var(--accent-color);
+  box-shadow: 0 0 25px var(--highlight-color);
+  transform: translateY(-3px);
+}
+
+@keyframes glitch {
+  0%, 100% { transform: none; }
+  25% { transform: skew(-0.5deg, -0.5deg); }
+  50% { transform: none; }
+  75% { transform: skew(0.5deg, 0.5deg); }
+}
+
+@keyframes glitch-before {
+  0% { clip-path: inset(85% 0 5% 0); }
+  20% { clip-path: inset(45% 0 45% 0); }
+  40% { clip-path: inset(5% 0 85% 0); }
+  60% { clip-path: inset(70% 0 10% 0); }
+  80% { clip-path: inset(30% 0 50% 0); }
+  100% { clip-path: inset(85% 0 5% 0); }
+}
+
+@keyframes glitch-after {
+  0% { clip-path: inset(0 0 95% 0); }
+  20% { clip-path: inset(50% 0 30% 0); }
+  40% { clip-path: inset(80% 0 5% 0); }
+  60% { clip-path: inset(15% 0 70% 0); }
+  80% { clip-path: inset(60% 0 25% 0); }
+  100% { clip-path: inset(0 0 95% 0); }
+}
+
+/* =========================
    Responsiveness
 ========================= */
 @media (max-width: 992px) {
@@ -690,6 +790,7 @@ footer {
   .photo-canvas,
   .map-picker { max-height: 200px; }
   .bookmark-container { padding: 1rem; }
+  .not-fount h2 { font-size: 6rem; } /* Sesuaikan ukuran font di mobile */
 }
 
 @media (max-width: 500px) {
