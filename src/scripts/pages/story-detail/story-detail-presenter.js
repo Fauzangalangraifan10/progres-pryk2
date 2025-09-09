@@ -17,7 +17,7 @@ class StoryDetailPresenter {
   async _init() {
     try {
       const token = localStorage.getItem('accessToken');
-      const story = await getStoryDetail({ id: this._storyId, token });
+      const story = await getStoryDetail(this._storyId);
 
       this._renderStory(story);
       this._initSaveButton(story);

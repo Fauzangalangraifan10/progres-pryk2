@@ -77,12 +77,6 @@ class App {
     const text = this._header.querySelector('#subscribe-text');
     if (!btn) return;
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.bundle.js')
-        .then(() => console.log('Service Worker registered!'))
-        .catch((err) => console.error('Service Worker registration failed:', err));
-    }
-
     const registration = await navigator.serviceWorker.ready;
     const existingSubscription = await registration.pushManager.getSubscription();
 

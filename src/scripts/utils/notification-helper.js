@@ -2,6 +2,7 @@
 
 import CONFIG from '../config';
 import { subscribePushNotification, unsubscribePushNotification } from "../data/api";
+import { convertBase64ToUint8Array } from "./index"; // ✅ gunakan dari utils/index.js
 
 const NotificationHelper = {
   // Cek apakah browser mendukung push notification
@@ -31,20 +32,22 @@ const NotificationHelper = {
 
     try {
       const registration = await navigator.serviceWorker.ready;
-      const existingSubscription = await registration.pushManager.getSubscription();
-      if (existingSubscription) return existingSubscription;
+      let subscription = await registration.pushManager.getSubscription();
 
-      // Buat subscription baru tanpa expirationTime
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: convertBase64ToUint8Array(CONFIG.VAPID_PUBLIC_KEY),
-      });
+      if (!subscription) {
+        // Buat subscription baru
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertBase64ToUint8Array(CONFIG.VAPID_PUBLIC_KEY),
+        });
+      }
 
+      // Sync ke server
       try {
         await subscribePushNotification(subscription);
-        console.log('✅ Push notification berhasil disubscribe');
+        console.log('✅ Push notification berhasil disubscribe & sinkron ke server');
       } catch (apiError) {
-        console.warn('⚠️ Subscribe berhasil tapi gagal kirim ke server:', apiError.message);
+        console.warn('⚠️ Subscribe di browser berhasil, tapi gagal kirim ke server:', apiError.message);
       }
 
       return subscription;
@@ -61,36 +64,28 @@ const NotificationHelper = {
     try {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
-      if (subscription) {
-        // Hapus di browser dulu
-        await subscription.unsubscribe();
 
-        try {
-          await unsubscribePushNotification(subscription);
-          console.log('✅ Push notification berhasil di-unsubscribe di server');
-        } catch (apiError) {
-          console.warn('⚠️ Berhasil unsubscribe di browser, tapi gagal di server (CORS/blocked)');
-        }
-
-        return true;
+      if (!subscription) {
+        console.warn('ℹ️ Tidak ada subscription aktif yang bisa di-unsubscribe');
+        return false;
       }
-      return false;
+
+      // Hapus di browser dulu
+      await subscription.unsubscribe();
+
+      try {
+        await unsubscribePushNotification(subscription);
+        console.log('✅ Push notification berhasil di-unsubscribe di server & browser');
+      } catch (apiError) {
+        console.warn('⚠️ Unsubscribe di browser berhasil, tapi gagal di server (CORS/blocked):', apiError.message);
+      }
+
+      return true;
     } catch (error) {
       console.error('❌ Gagal unsubscribe push notification:', error);
       return false;
     }
   },
 };
-
-// Util: konversi VAPID key dari Base64 ke Uint8Array
-function convertBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
-
-  const rawData = window.atob(base64);
-  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
-}
 
 export default NotificationHelper;

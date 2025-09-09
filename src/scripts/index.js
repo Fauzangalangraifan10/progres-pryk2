@@ -3,18 +3,7 @@ import 'regenerator-runtime';
 import 'leaflet/dist/leaflet.css';
 import '../styles/styles.css';
 import App from './pages/app.js';
-
-// Fungsi registrasi SW
-async function swRegister() {
-  if ('serviceWorker' in navigator) {
-    try {
-      const reg = await navigator.serviceWorker.register('/sw.bundle.js');
-      console.log('Service Worker registered!', reg);
-    } catch (err) {
-      console.error('Service Worker registration failed:', err);
-    }
-  }
-}
+import { swRegister } from './utils/index.js'; // ✅ pakai dari utils
 
 window.addEventListener('DOMContentLoaded', async () => {
   const app = new App({
@@ -29,6 +18,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Render halaman awal
   await app.renderPage();
 
-  // Register SW
+  // Register SW hanya sekali
   await swRegister();
 });

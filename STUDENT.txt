@@ -1,2 +1,3 @@
 APP_URL=<url_aplikasi>
 MAP_SERVICE_API_KEY=<DhRAj1a4Hy5vbPrvrVqX>
+ URL hasil deployment : https://melodic-paprenjak-e109d7.netlify.app/
